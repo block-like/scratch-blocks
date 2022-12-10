@@ -1,0 +1,79 @@
+name: Rebuild and commit
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - develop
+jobs:
+  rebuild:
+    concurrency: ci-${{ github.ref }} # Recommended if you intend to make multiple deployments in quick succession.
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      
+      - name: Rebuild
+        run: |
+         npm install
+         npm run translate
+       
+      - name: Upload built-dist
+        uses: actions/upload-artifact@v3.1.1
+        with:
+          name: built-dist
+          path: dist
+      - name: Upload built-media
+        uses: actions/upload-artifact@v3.1.1
+        with:
+          name: built-media
+          path: media
+          
+      - name: Checkout to develop-builds
+        uses: actions/checkout@v3
+        with:
+          ref: develop-builds
+      
+      - name: Clear out things
+        run: |
+          rm -rf dist/*
+          rm -rf media/*
+  commit:
+    concurrency: ci-${{ github.ref }} # Recommended if you intend to make multiple deployments in quick succession.
+    runs-on: ubuntu-latest
+    needs: rebuild
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+          
+      - name: Download built-dist
+        uses: actions/download-artifact@v3.0.1
+        with:
+          name: built-dist
+          path: dist/
+      - name: Download built-media
+        uses: actions/download-artifact@v3.0.1
+        with:
+          name: built-media
+          path: media/
+      
+      - name: Commit
+        uses: EndBug/add-and-commit@v9.1.1
+        with:
+          message: "Build"
+          committer_name: GitHub Actions
+          committer_email: actions@github.com
+  dispatch:
+    concurrency: ci-${{ github.ref }} # Recommended if you intend to make multiple deployments in quick succession.
+    runs-on: ubuntu-latest
+    if: ${{ always() }}
+    needs: [rebuild, commit]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        
+      - name: Repository Dispatch
+        uses: peter-evans/repository-dispatch@v2.0.1
+        with:
+          token: ${{ secrets.t }}
+          event-type: Blocks Update
+          repository: block-like/scratch-gui
