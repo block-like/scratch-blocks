@@ -46,8 +46,10 @@ jobs:
     runs-on: ubuntu-latest
     needs: rebuild
     steps:
-      - name: Checkout
+      - name: Checkout with develop-builds
         uses: actions/checkout@v3
+        with:
+          ref: develop-builds
           
       - name: Download built-dist
         uses: actions/download-artifact@v3.0.1
@@ -63,7 +65,7 @@ jobs:
       - name: Commit
         uses: EndBug/add-and-commit@v9.1.1
         with:
-          message: "Build"
+          message: "Build Blocks"
           committer_name: GitHub Actions
           committer_email: actions@github.com
   dispatch:
@@ -72,8 +74,10 @@ jobs:
     if: ${{ always() }}
     needs: [rebuild, commit]
     steps:
-      - name: Checkout
+      - name: Checkout with develop-builds
         uses: actions/checkout@v3
+        with:
+          ref: develop-builds
         
       - name: Repository Dispatch
         uses: peter-evans/repository-dispatch@v2.0.1
