@@ -1,0 +1,22 @@
+name: Reset built data
+on:
+  workflow_dispatch:
+jobs:
+  dispatch:
+    concurrency: ci-${{ github.ref }} # Recommended if you intend to make multiple deployments in quick succession.
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout with develop-builds
+        uses: actions/checkout@v3
+        with:
+          ref: develop-builds
+        
+      - name: Reset built data
+        run: find -mindepth 1 -delete
+      
+      - name: Commit
+        uses: EndBug/add-and-commit@v9.1.1
+        with:
+          message: "Reset Blocks"
+          committer_name: GitHub Actions
+          committer_email: actions@github.com

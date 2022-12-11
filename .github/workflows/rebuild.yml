@@ -70,7 +70,7 @@ jobs:
     if: ${{ always() }}
     needs: [rebuild, commit]
     steps:
-      - name: Checkout with develop-builds
+      - name: Checkout
         uses: actions/checkout@v3
         
       - name: Repository Dispatch
