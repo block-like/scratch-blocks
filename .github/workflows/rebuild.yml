@@ -16,6 +16,7 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: '2.7'
+
       - name: Rebuild
         run: |
          npm install
@@ -31,16 +32,6 @@ jobs:
         with:
           name: built-media
           path: media
-          
-      - name: Checkout to develop-builds
-        uses: actions/checkout@v3
-        with:
-          ref: develop-builds
-      
-      - name: Clear out things
-        run: |
-          rm -rf dist/*
-          rm -rf media/*
   commit:
     concurrency: ci-${{ github.ref }} # Recommended if you intend to make multiple deployments in quick succession.
     runs-on: ubuntu-latest
@@ -50,6 +41,11 @@ jobs:
         uses: actions/checkout@v3
         with:
           ref: develop-builds
+
+      - name: Clear out things
+        run: |
+          rm -rf dist/*
+          rm -rf media/*
           
       - name: Download built-dist
         uses: actions/download-artifact@v3.0.1
@@ -76,8 +72,6 @@ jobs:
     steps:
       - name: Checkout with develop-builds
         uses: actions/checkout@v3
-        with:
-          ref: develop-builds
         
       - name: Repository Dispatch
         uses: peter-evans/repository-dispatch@v2.0.1
